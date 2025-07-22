@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/authOptions";
-import clientPromise from "@/lib/mongodb";
+import getClientPromise from "@/lib/mongodb";
 import { redirect } from "next/navigation";
 
 type SessionUser = {
@@ -20,7 +20,7 @@ export default async function AdminPage() {
     return redirect("/dashboard");
   }
 
-  const client = await clientPromise;
+  const client = await getClientPromise();
   const db = client.db();
   const users = await db.collection("users").find().project({ password: 0 }).toArray();
 

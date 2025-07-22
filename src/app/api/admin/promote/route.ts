@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/authOptions";
-import clientPromise from "@/lib/mongodb";
+import getClientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 
@@ -15,7 +15,7 @@ export async function POST(req: Request) {
   }
 
   const { userId, newRole } = await req.json();
-  const client = await clientPromise;
+  const client = await getClientPromise();
   const db = client.db();
 
   await db.collection("users").updateOne(

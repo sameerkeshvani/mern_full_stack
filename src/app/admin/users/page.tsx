@@ -16,6 +16,7 @@ export default function AdminUserPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [updatingRole, setUpdatingRole] = useState<string | null>(null);
+  const [deletingUser, setDeletingUser] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -58,6 +59,27 @@ export default function AdminUserPage() {
       setError(error instanceof Error ? error.message : "Failed to update role");
     } finally {
       setUpdatingRole(null);
+    }
+  };
+
+  const deleteUser = async (userId: string) => {
+    if (!window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) return;
+    setDeletingUser(userId);
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to delete user");
+      }
+      setUsers(users.filter(user => user._id !== userId));
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Failed to delete user");
+    } finally {
+      setDeletingUser(null);
     }
   };
 
@@ -212,17 +234,26 @@ export default function AdminUserPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(user.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap flex gap-2 items-center">
                       {user._id !== session.user?.id && (
-                        <select
-                          value={user.role}
-                          onChange={(e) => updateUserRole(user._id, e.target.value)}
-                          disabled={updatingRole === user._id}
-                          className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        >
-                          <option value="user">User</option>
-                          <option value="admin">Administrator</option>
-                        </select>
+                        <>
+                          <select
+                            value={user.role}
+                            onChange={(e) => updateUserRole(user._id, e.target.value)}
+                            disabled={updatingRole === user._id}
+                            className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          >
+                            <option value="user">User</option>
+                            <option value="admin">Administrator</option>
+                          </select>
+                          <button
+                            className="btn btn-danger btn-sm"
+                            onClick={() => deleteUser(user._id)}
+                            disabled={deletingUser === user._id}
+                          >
+                            {deletingUser === user._id ? "Deleting..." : "Delete"}
+                          </button>
+                        </>
                       )}
                       {user._id === session.user?.id && (
                         <span className="text-gray-400 text-xs">Current User</span>

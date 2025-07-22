@@ -1,4 +1,4 @@
-import clientPromise from "@/lib/mongodb";
+import getClientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
 export async function logAuditEvent({
@@ -13,7 +13,7 @@ export async function logAuditEvent({
   details?: Record<string, unknown>;
 }) {
   try {
-    const client = await clientPromise;
+    const client = await getClientPromise();
     const db = client.db();
     
     await db.collection("audit_logs").insertOne({

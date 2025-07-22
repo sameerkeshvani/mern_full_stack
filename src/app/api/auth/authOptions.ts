@@ -1,7 +1,8 @@
 import { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
-import clientPromise from "@/lib/mongodb";
+import getClientPromise from "@/lib/mongodb";
+import GoogleProvider from "next-auth/providers/google";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -12,7 +13,7 @@ export const authOptions: AuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const client = await clientPromise;
+        const client = await getClientPromise();
         const db = client.db();
         const user = await db.collection("users").findOne({ email: credentials!.email });
         if (!user) throw new Error("User not found");
@@ -30,6 +31,10 @@ export const authOptions: AuthOptions = {
           role: string;
         };
       },
+    }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
   ],
   callbacks: {

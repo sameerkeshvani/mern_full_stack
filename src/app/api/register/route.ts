@@ -1,10 +1,10 @@
 import { hash } from "bcryptjs";
 import { NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb";
+import getClientPromise from "@/lib/mongodb";
 
 export async function POST(req: Request) {
   const { name, email, password } = await req.json();
-  const client = await clientPromise;
+  const client = await getClientPromise();
   const db = client.db();
 
   const existing = await db.collection("users").findOne({ email });

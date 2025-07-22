@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/authOptions";
-import clientPromise from "@/lib/mongodb";
+import getClientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { NextResponse } from "next/server";
 import { logAuditEvent } from "@/lib/audit";
@@ -23,7 +23,7 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
 
-    const client = await clientPromise;
+    const client = await getClientPromise();
     const db = client.db();
 
     // Prevent self-demotion
